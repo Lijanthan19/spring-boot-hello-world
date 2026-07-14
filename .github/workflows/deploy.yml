@@ -7,7 +7,6 @@ on:
 
 jobs:
   build-and-deploy:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +23,7 @@ jobs:
       - name: Build Application
         run: mvn clean package
 
-      - name: Upload JAR
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: springboot-app
@@ -39,33 +38,28 @@ jobs:
           source: "target/*.jar"
           target: "/opt/springboot"
 
-      - name: Restart Spring Boot Application
+      - name: Deploy Application
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            mkdir -p /opt/springboot/logs
+            echo "Starting deployment..."
 
-            echo "Stopping existing application..."
-            pkill -f spring-boot-hello-world || true
+            # Copy the latest JAR to the application location
+            cp /opt/springboot/target/*.jar /opt/springboot/app.jar
 
-            sleep 3
+            # Restart the Spring Boot service
+            sudo systemctl restart springboot
 
-            echo "Finding JAR..."
-            JAR=$(find /opt/springboot -name "*.jar" | head -n 1)
+            # Wait a few seconds
+            sleep 5
 
-            echo "Starting application..."
-            nohup java -jar "$JAR" > /opt/springboot/logs/app.log 2>&1 < /dev/null &
+            echo "Service Status:"
+            sudo systemctl status springboot --no-pager
 
-            sleep 10
+            echo "Health Check:"
+            curl http://localhost:8080
 
-            if pgrep -f "$JAR" > /dev/null; then
-                echo "Application started successfully."
-            else
-                echo "Application failed to start."
-                cat /opt/springboot/logs/app.log
-                exit 1
-            fi
-        
+            echo "Deployment completed successfully!"
