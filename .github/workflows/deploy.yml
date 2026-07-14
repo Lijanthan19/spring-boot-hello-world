@@ -46,6 +46,26 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            pkill -f 'java -jar' || true
+            mkdir -p /opt/springboot/logs
+
+            echo "Stopping existing application..."
+            pkill -f spring-boot-hello-world || true
+
+            sleep 3
+
+            echo "Finding JAR..."
             JAR=$(find /opt/springboot -name "*.jar" | head -n 1)
-            nohup java -jar "$JAR" > /opt/springboot/logs/app.log 2>&1 &
+
+            echo "Starting application..."
+            nohup java -jar "$JAR" > /opt/springboot/logs/app.log 2>&1 < /dev/null &
+
+            sleep 10
+
+            if pgrep -f "$JAR" > /dev/null; then
+                echo "Application started successfully."
+            else
+                echo "Application failed to start."
+                cat /opt/springboot/logs/app.log
+                exit 1
+            fi
+        
