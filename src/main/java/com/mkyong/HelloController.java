@@ -8,7 +8,7 @@ public class HelloController {
 
     @RequestMapping("/")
     String hello() {
-        return "Hello World, Spring Boot!Version 2 chek if its refect CICD";
+        return "Hello World, Spring Boot!Version 2 chek if its refeclected CICD";
     }
 
 }
