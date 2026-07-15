@@ -19,7 +19,7 @@ public class HelloControllerRestClientTests {
         restTestClient.get().uri("/")
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(String.class).isEqualTo("Hello World, Spring Boot!Version 1 chek if its refect CICD");
+                .expectBody(String.class).isEqualTo("Hello World, Spring Boot!Version 2 chek if its refeclected CICD");
 
     }
 
