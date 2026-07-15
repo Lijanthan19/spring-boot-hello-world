@@ -11,4 +11,4 @@ public class HelloController {
         return "Hello World, Spring Boot!Version 2 chek if its refeclected CICD";
     }
 
-}
+}   
